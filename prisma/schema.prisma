@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id  Int @id @default(autoincrement())
+  email String @unique
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  movie_rent MovieRent[] @relation("userRent") // Campo que não vai para o banco fisico, ele só existe para fazer a conexão entre User e MovieRent
+
+  @@map("user")
+}
+
+model Movie {
+  id Int @id @default(autoincrement())
+  title String @unique
+  duration Int
+  releaseDate DateTime
+
+  movie_rent MovieRent[] @relation("movieRent") // Campo que não vai para o banco fisico, ele só existe para fazer a conexão entre Movies e MovieRent
+}
+
+model MovieRent {
+  user User @relation("userRent", fields: [userId], references: [id]) // Campo que relaciona os campos dos outros models com o campo do model atual (não vai para o banco fisico)
+  userId Int
+  movie Movie @relation("movieRent", fields: [movieId], references: [id]) // Campo que relaciona os campos dos outros models com o campo do model atual (não vai para o banco fisico)
+  movieId Int
+
+  @@id([userId, movieId])
+}
